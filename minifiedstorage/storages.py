@@ -45,7 +45,7 @@ class MinifiedManifestStaticFilesStorage(ManifestStaticFilesStorage):
             # save gziped file as fell, we overwrite the content_file variable to save a tiny bit memory
             try:
                 content = zlib_compress(content)
-                super(MinifiedManifestStaticFilesStorage, self)._save("%s.gz" % hashed_name,ContentFile(content))
+                super(MinifiedManifestStaticFilesStorage, self)._save("%s.gz" % saved_name,ContentFile(content))
             except Exception as e:
                 raise MinifiedStorageException("Could not gzip file %s, error: %s" % (hashed_name,e,))
         return saved_name
