@@ -3,7 +3,7 @@ import os
 long_description = 'see Readme.md'
 if os.path.exists('README.txt'):
     long_description = open('README.txt').read()
-setup(name='django_minifiedstorage',
+setup(name='django-minifiedstorage',
       version='0.1',
       description='Simple minified storage for django static assets',
       long_description=long_description,
