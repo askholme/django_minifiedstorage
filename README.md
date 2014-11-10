@@ -4,23 +4,33 @@ This is a dead simple extension of Django's ManifestStaticFilesStorage
 aimed at supporting a workflow where main asset management is
 handled outside Django but Django still needs to support the
 production deployment. It extends the ManifestStaticFilesStorage
-from 1.7 to provide the following features on top the existing
-md5-hasing
+from 1.7 to provide the following features on top
 
 * Automatic minification of js/css files
-* Automatic generating of .gz version for all assets
+* Automatic generation of .gz version for all assets
 
-### Design philosphy
+In the intended usecase grunt,brunch,gulp or similiar frontend tool is
+used to manage assets in development. This extension then provides
+the django specific logic needed for sane production deployment i.e.
+it generates assets which are minified and contains hashes in the filename
+to allow a "cache forever" strategy. Additionally .gz files are generated to
+allow for serving such to supporting clients. 
+
+All minification and compression happens at deployment time (when calling 
+collectstatic) so to support high-throughput cases where generation
+for each request is impractical. 
+
+### Design philosophy
 
 * Small code base based mainly on existing Django functionality 
-* Pure python requirements to allow use in production environments
+* No non-python dependencies to simplify production deployment
 
 ### Requirements
 
 * Django 1.7 or later
-* [Slimit](https://github.com/rspivak/slimit) (unless other js minification is supplied)
-* [csscompressor](https://github.com/sprymix/csscompressor) (unless other css minification is supplied)
-* Python zlib (unless Gzipping is turned off)
+* [Slimit](https://github.com/rspivak/slimit) (unless other js minification engine is used)
+* [csscompressor](https://github.com/sprymix/csscompressor) (unless other css minification engine is used)
+* Python zlib (for gzipping generation)
 
 ## Usage
 Install from pip
@@ -39,10 +49,10 @@ the static templatetag to include your assets
 
 ## Configuration
 ### Minification tools 
-Control minifying be changing the MINIFIED_COMPRESSORS dict-setting.
-The dict key is a regex to match against the filename and the value 
-is a function minification function which takes a single string 
-argument and returns the minified string, i.e.
+Minifying behaviour can be controlled through the MINIFIED_COMPRESSORS setting.
+The setting takes a dict where the key is a regex to match against asset filenames
+and the value is a minification function which takes a single string argument 
+and returns the minified version of this string string, i.e.
 ```
 def minify_function(string)
 	...minify logic...
@@ -58,8 +68,5 @@ MINIFIED_COMPRESSORS = settings.get('MINIFIED_COMPRESSORS',{
 where minifiy_js and minify_css is wrappers around [Slimit](https://github.com/rspivak/slimit)
 and [csscompressor](https://github.com/sprymix/csscompressor) .
 
-You can apply other minification tools by supplying your own function.
-Note that the setting supports directly supplying a function
-as well as suppling the function path as text, i.e. 'minifiedstorage.compressors.minify_js'
 ### Gzip compression
-Turn Gzip compression off by setting `MINIFIED_GZIP=False`
+Generation of gzipped assets can be turned off by setting `MINIFIED_GZIP=False`
